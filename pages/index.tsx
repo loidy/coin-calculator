@@ -1,118 +1,160 @@
-import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import {Component} from "react";
+import {AppProps} from "next/app";
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
-  return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+interface HomeState {
+  money: number,
+  pp: number,
+  gp: number,
+  sp: number,
+  cp: number
+}
+type CoinType = keyof HomeState;
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+export default class Home extends Component<AppProps, HomeState> {
+  private rate = 0.50;
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+  constructor(props: AppProps) {
+    super(props);
+    this.state = {
+      money: 0,
+      pp: 0,
+      gp: 0,
+      sp: 0,
+      cp: 0
+    }
+  }
+
+  handleChange(event: string, type: CoinType) {
+    if (type == 'money') {
+      const money = parseFloat(event);
+      this.setState({
+        ...this.calculateCoins(this.convertMoneyToCopper(money)),
+        money: money
+      })
+    } else {
+      this.setState(prevState => ({
+        ...prevState,
+        [type]: parseInt(event),
+        money: this.calculateMoney({
+          ...prevState,
+          [type]: parseInt(event),
+        })
+      }));
+    }
+  }
+
+  private convertMoneyToCopper(money: number): number {
+    return Math.floor(money / this.rate);
+  }
+
+  private calculateCoins(copper: number): HomeState {
+    return {
+      pp: Math.floor(copper / 1000),
+      gp: Math.floor((copper % 1000) / 100),
+      sp: Math.floor((copper % 100) / 10),
+      cp: Math.floor(copper % 10),
+      money: copper * 0.50
+    }
+  }
+
+  private calculateMoney(state: HomeState): number {
+    return ((state.pp || 0) * 1000 + (state.gp || 0) * 100 + (state.sp || 0) * 10 + (state.cp || 0)) * this.rate;
+  }
+
+  render() {
+    return (
+        <main
+            className={`flex min-h-screen flex-col sm:flex-row items-center justify-center text-2xl ${inter.className}`}
         >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+          <div className="w-36 min-w-min m-2">
+            <label htmlFor="money" className="block font-medium text-gray-900">
+              €
+            </label>
+            <div className="mt-2">
+              <input
+                  type="number"
+                  name="money"
+                  id="money"
+                  step=".01"
+                  min={0}
+                  value={this.state.money}
+                  onChange={(event) => this.handleChange(event.target.value, 'money')}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-2xl"
+              />
+            </div>
+          </div>
+          <div className="w-36 min-w-min m-2">
+            <label htmlFor="pp" className="block font-medium text-gray-900">
+              PP
+            </label>
+            <div className="mt-2">
+              <input
+                  type="number"
+                  name="pp"
+                  id="pp"
+                  min={0}
+                  pattern="[0-9]+"
+                  value={this.state.pp}
+                  onChange={(event) => this.handleChange(event.target.value, 'pp')}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-2xl"
+              />
+            </div>
+          </div>
+          <div className="w-36 min-w-min m-2">
+            <label htmlFor="gp" className="block font-medium text-gray-900">
+              GP
+            </label>
+            <div className="mt-2">
+              <input
+                  type="number"
+                  name="gp"
+                  id="gp"
+                  min={0}
+                  pattern="[0-9]+"
+                  value={this.state.gp}
+                  onChange={(event) => this.handleChange(event.target.value, 'gp')}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-2xl"
+              />
+            </div>
+          </div>
+          <div className="w-36 min-w-min m-2">
+            <label htmlFor="sp" className="block font-medium text-gray-900">
+              SP
+            </label>
+            <div className="mt-2">
+              <input
+                  type="number"
+                  name="sp"
+                  id="sp"
+                  min={0}
+                  pattern="[0-9]+"
+                  value={this.state.sp}
+                  onChange={(event) => this.handleChange(event.target.value, 'sp')}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-2xl"
+              />
+            </div>
+          </div>
+          <div className="w-36 min-w-min m-2">
+            <label htmlFor="cp" className="block font-medium text-gray-900">
+              CP
+            </label>
+            <div className="mt-2">
+              <input
+                  type="number"
+                  name="cp"
+                  id="cp"
+                  min={0}
+                  pattern="[0-9]+"
+                  value={this.state.cp}
+                  onChange={(event) => this.handleChange(event.target.value, 'cp')}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-2xl"
+              />
+            </div>
+          </div>
+        </main>
+    )
+  }
 }
